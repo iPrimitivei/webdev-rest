@@ -97,8 +97,17 @@ app.put('/new-incident', (req, res) => {
 // DELETE request handler for new crime incident
 app.delete('/remove-incident', (req, res) => {
     console.log(req.body); // uploaded data
+    let case_num = req.body.case_number;
+    let query = 'DELETE FROM incidents WHERE case_number = ?';
     
-    res.status(200).type('txt').send('OK'); // <-- you may need to change this
+    dbRun(query, [case_num])
+        .then(() => {
+            res.status(200).type('txt').send('Successfully Deleted.');
+        })
+        .catch((err) => {
+            console.error(err);
+            res.status(500).type('txt').send('Error, could not complete deletion.');
+        });
 });
 
 /********************************************************************
