@@ -58,9 +58,19 @@ function dbRun(query, params) {
  ********************************************************************/
 // GET request handler for crime codes
 app.get('/codes', (req, res) => {
-    console.log(req.query); // query object (key-value pairs after the ? in the url)
-    
-    res.status(200).type('json').send({}); // <-- you will need to change this
+    dbSelect(
+        `SELECT code, incident_type AS type
+        FROM Codes
+        ORDER BY code ASC`,
+        []
+    )
+    .then(rows => {
+        res.status(200).json(rows);
+    })
+    .catch(err => {
+        console.error("Error retrieving codes:", err);
+        res.status(500).json({error: "Internal server error"});
+    });
 });
 
 // GET request handler for neighborhoods

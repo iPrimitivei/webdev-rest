@@ -3,14 +3,22 @@
     "description": "REST Server",
     "version": "1.0.0",
     "author": {
-        "name": "",
-        "email": ""
+        "name": "Alex Wodarski",
+        "email": "woda7502@stthomas.edu"
     },
     "contributors": [
+        {
+            "name": "Ada Huang",
+            "email": "ada.huang@stthomas.edu"
+        },
+        {
+            "name": "Hunter Heffernan",
+            "email": "heff5015@stthomas.edu"
+        }
     ],
     "repository": {},
     "dependencies": {
-        "express": "^4.18.2",
+        "express": "^4.21.2",
         "sqlite3": "^5.1.6"
     }
 }
