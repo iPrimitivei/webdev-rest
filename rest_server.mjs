@@ -88,13 +88,24 @@ app.get('/incidents', (req, res) => {
 });
 
 // PUT request handler for new crime incident
+// curl -X PUT "http://localhost:8000/new-incident" -H "Content-Type: application/json" -d "{\"case_number\": \"1\", \"date_time\": \"2025-12-19T12:00:00\", \"code\": \"67\", \"incident\": \"Narcotics\", \"police_grid\": \"67\", \"neighborhood_number\": \"67\", \"block\": \"Lex X Vic\"}"
+
 app.put('/new-incident', (req, res) => {
     console.log(req.body); // uploaded data
-    
-    res.status(200).type('txt').send('OK'); // <-- you may need to change this
+    let query = 'INSERT INTO incidents (case_number, date_time, code, incident, police_grid, neighborhood_number, block) VALUES (?, ?, ?, ?, ?, ?, ?)';
+    dbRun(query, [req.body.case_number, req.body.date_time, req.body.code, req.body.incident, req.body.police_grid, req.body.neighborhood_number, req.body.block])
+        .then(() => {
+            res.status(200).type('txt').send('Successfully Added.');
+        })
+        .catch((err) => {
+            console.error(err);
+            res.status(500).type('txt').send('Error, could not complete addition.');
+        });
 });
 
 // DELETE request handler for new crime incident
+// curl -X DELETE "http://localhost:8000/remove-incident" -H "Content-Type: application/json" -d "{\"case_number\": \"1223414\"}"
+
 app.delete('/remove-incident', (req, res) => {
     console.log(req.body); // uploaded data
     let case_num = req.body.case_number;
