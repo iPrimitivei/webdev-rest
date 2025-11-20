@@ -119,11 +119,24 @@ app.put('/new-incident', (req, res) => {
 app.delete('/remove-incident', (req, res) => {
     console.log(req.body); // uploaded data
     let case_num = req.body.case_number;
+    let existence_check = 'SELECT * FROM incidents WHERE case_number = ?'
     let query = 'DELETE FROM incidents WHERE case_number = ?';
-    
-    dbRun(query, [case_num])
-        .then(() => {
-            res.status(200).type('txt').send('Successfully Deleted.');
+
+    dbSelect(existence_check, [case_num])
+        .then((rows) => {
+            if (rows.length === 0) {
+                res.status(500).type('txt').send('Error, could not complete deletion, case number does not exist.');
+                return;
+            }
+
+            dbRun(query, [case_num])
+                .then(() => {
+                    res.status(200).type('txt').send('Successfully Deleted.');
+                })
+                .catch((err) => {
+                    console.error(err);
+                    res.status(500).type('txt').send('Error, could not complete deletion.');
+                });
         })
         .catch((err) => {
             console.error(err);
