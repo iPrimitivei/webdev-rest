@@ -75,9 +75,19 @@ app.get('/codes', (req, res) => {
 
 // GET request handler for neighborhoods
 app.get('/neighborhoods', (req, res) => {
-    console.log(req.query); // query object (key-value pairs after the ? in the url)
-    
-    res.status(200).type('json').send({}); // <-- you will need to change this
+    dbSelect(
+        `SELECT neighborhood_number AS id, neighborhood_name AS name
+        FROM Neighborhoods
+        ORDER by id`,
+        []
+    )
+    .then(rows => {
+        res.status(200).json(rows);
+    })
+    .catch(err => {
+        console.error("Error retrieving codes:", err);
+        res.status(500).json({error: "Internal server error"});
+    });
 });
 
 // GET request handler for crime incidents
