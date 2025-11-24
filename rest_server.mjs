@@ -91,10 +91,26 @@ app.get('/neighborhoods', (req, res) => {
 });
 
 // GET request handler for crime incidents
+//basic checked
 app.get('/incidents', (req, res) => {
-    console.log(req.query); // query object (key-value pairs after the ? in the url)
-    
-    res.status(200).type('json').send({}); // <-- you will need to change this
+    console.log(req.query);  // query object (key-value pairs after the ? in the url)
+    dbSelect(
+    `SELECT case_number, 
+    date(date_time) AS date, --"YYYY-MM-DD"
+    time(date_time) AS time, --"HH:MM:SS"
+    code, incident, police_grid, neighborhood_number, block
+    FROM Incidents
+    Order BY date_time DESC
+    LIMIT 3`, //testing limit
+    []
+    )
+    .then(rows => {
+        res.status(200).json(rows);
+    })
+    .catch(err =>{
+        console.error("Eror retrieving codes:", err);
+        res.status(500).json({error: "Internal server error"});
+    });
 });
 
 // PUT request handler for new crime incident
