@@ -58,12 +58,23 @@ function dbRun(query, params) {
  ********************************************************************/
 // GET request handler for crime codes
 app.get('/codes', (req, res) => {
-    dbSelect(
-        `SELECT code, incident_type AS type
-        FROM Codes
-        ORDER BY code ASC`,
-        []
-    )
+    let query = `SELECT code, incident_type AS type FROM Codes`;
+    
+    let params = [];
+
+    if (req.query.code) {
+        const codes = req.query.code.split(',').map(c => c.trim()).filter(c => /^\d+$/.test(c));
+        
+        if (codes.length > 0) {
+            const placeholders = codes.map(() => '?').join(',');
+            query += ` WHERE code IN (${placeholders})`;
+            params = codes;
+        }
+    }
+
+    query += ` ORDER BY code ASC`;
+
+    dbSelect(query, params)
     .then(rows => {
         res.status(200).json(rows);
     })
