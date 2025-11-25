@@ -86,12 +86,23 @@ app.get('/codes', (req, res) => {
 
 // GET request handler for neighborhoods
 app.get('/neighborhoods', (req, res) => {
-    dbSelect(
-        `SELECT neighborhood_number AS id, neighborhood_name AS name
-        FROM Neighborhoods
-        ORDER by id`,
-        []
-    )
+    let query = `SELECT neighborhood_number AS id, neighborhood_name AS name FROM Neighborhoods`;
+
+    let params = [];
+
+    if (typeof req.query.id === 'string' && req.query.id.trim() !== '') {
+        const ids = req.query.id.split(',').map(i => i.trim()).filter(i => /^\d+$/.test(i));
+
+        if (ids.length > 0) {
+            const placeholders = ids.map(() => '?').join(',');
+            query += ` WHERE neighborhood_number IN (${placeholders})`;
+            params = ids;
+        }
+    }
+
+    query += ` ORDER BY id`;
+    
+    dbSelect(query, params)
     .then(rows => {
         res.status(200).json(rows);
     })
