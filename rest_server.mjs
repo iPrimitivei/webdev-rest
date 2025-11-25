@@ -113,26 +113,81 @@ app.get('/neighborhoods', (req, res) => {
 });
 
 // GET request handler for crime incidents
-//basic checked
 app.get('/incidents', (req, res) => {
-    console.log(req.query);  // query object (key-value pairs after the ? in the url)
-    dbSelect(
-    `SELECT case_number, 
-    date(date_time) AS date, --"YYYY-MM-DD"
-    time(date_time) AS time, --"HH:MM:SS"
-    code, incident, police_grid, neighborhood_number, block
-    FROM Incidents
-    Order BY date_time DESC
-    LIMIT 3`, //testing limit
-    []
-    )
-    .then(rows => {
-        res.status(200).json(rows);
-    })
-    .catch(err =>{
-        console.error("Eror retrieving codes:", err);
-        res.status(500).json({error: "Internal server error"});
-    });
+    let query = `
+        SELECT case_number,
+               date(date_time) AS date,
+               time(date_time) AS time,
+               code,
+               incident,
+               police_grid,
+               neighborhood_number,
+               block
+        FROM Incidents
+        WHERE 1=1
+    `;
+    let params = [];
+    
+    //queries
+    //start_date
+    if (req.query.start_date) {
+        query += ` AND date(date_time) >= ?`;
+        params.push(req.query.start_date);
+    }
+
+    //end_date
+    if (req.query.end_date) {
+        query += ` AND date(date_time) <= ?`;
+        params.push(req.query.end_date);
+    }
+
+    //code
+    if (req.query.code) {
+        const codes = req.query.code.split(',').map(c => c.trim()).filter(c => /^\d+$/.test(c));
+        if (codes.length > 0) {
+            const placeholders = codes.map(() => '?').join(',');
+            query += ` AND code IN (${placeholders})`;
+            params.push(...codes);
+        }
+    }
+
+    //grid
+    if (req.query.grid) {
+        const grids = req.query.grid.split(',').map(g => g.trim()).filter(g => /^\d+$/.test(g));
+        if (grids.length > 0) {
+            const placeholders = grids.map(() => '?').join(',');
+            query += ` AND police_grid IN (${placeholders})`;
+            params.push(...grids);
+        }
+    }
+
+    //neighborhood
+    if (req.query.neighborhood) {
+        const nbs = req.query.neighborhood.split(',').map(n => n.trim()).filter(n => /^\d+$/.test(n));
+        if (nbs.length > 0) {
+            const placeholders = nbs.map(() => '?').join(',');
+            query += ` AND neighborhood_number IN (${placeholders})`;
+            params.push(...nbs);
+        }
+    }
+
+    //limit
+    let limit = 1000;
+    if (req.query.limit && /^\d+$/.test(req.query.limit)) {
+        limit = parseInt(req.query.limit);
+    }
+
+    query += ` ORDER BY date_time DESC LIMIT ?`;
+    params.push(limit);
+
+    dbSelect(query, params)
+        .then(rows => {
+            res.status(200).json(rows);
+        })
+        .catch(err => {
+            console.error("Error retrieving incidents:", err);
+            res.status(500).json({ error: "Internal server error" });
+        });
 });
 
 // PUT request handler for new crime incident
