@@ -195,12 +195,14 @@ app.get('/incidents', (req, res) => {
 
 app.put('/new-incident', (req, res) => {
     console.log(req.body); // uploaded data
-    let query = 'INSERT INTO incidents (case_number, date_time, code, incident, police_grid, neighborhood_number, block) VALUES (?, ?, ?, ?, ?, ?, ?)';
-    dbRun(query, [req.body.case_number, req.body.date_time, req.body.code, req.body.incident, req.body.police_grid, req.body.neighborhood_number, req.body.block])
+    let query = 'INSERT INTO incidents (case_number, date_time, code, incident, police_grid, neighborhood_number, block) VALUES (?, ?, ?, ?, ?, ?, ?)'; // insert given parameters as sql query to add incident into db
+    let params = [req.body.case_number, req.body.date_time, req.body.code, req.body.incident, req.body.police_grid, req.body.neighborhood_number, req.body.block];
+
+    dbRun(query, params)
         .then(() => {
             res.status(200).type('txt').send('Successfully Added.');
         })
-        .catch((err) => {
+        .catch((err) => { 
             console.error(err);
             res.status(500).type('txt').send('Error, could not complete addition.');
         });
@@ -215,14 +217,14 @@ app.delete('/remove-incident', (req, res) => {
     let existence_check = 'SELECT * FROM incidents WHERE case_number = ?'
     let query = 'DELETE FROM incidents WHERE case_number = ?';
 
-    dbSelect(existence_check, [case_num])
+    dbSelect(existence_check, [case_num]) // check if case number exists
         .then((rows) => {
             if (rows.length === 0) {
                 res.status(500).type('txt').send('Error, could not complete deletion, case number does not exist.');
                 return;
             }
 
-            dbRun(query, [case_num])
+            dbRun(query, [case_num]) // case number exists, delete case number
                 .then(() => {
                     res.status(200).type('txt').send('Successfully Deleted.');
                 })
