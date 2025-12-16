@@ -111,7 +111,3 @@ Deletes an incident.
 
 ---
 
-## Repository
-
-Project code is available at: [https://github.com/iPrimitivei/webdev-rest](https://github.com/iPrimitivei/webdev-rest)
-
